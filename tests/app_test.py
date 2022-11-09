@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 import json
 from project.app import app, db
+
 TEST_DB = "test.db"
 
 
@@ -31,11 +32,13 @@ def logout(client):
     """Logout helper function"""
     return client.get("/logout", follow_redirects=True)
 
+
 def test_delete_message(client):
     """Ensure the messages are being deleted"""
-    rv = client.get('/delete/1')
+    rv = client.get("/delete/1")
     data = json.loads(rv.data)
     assert data["status"] == 1
+
 
 def test_index(client):
     response = client.get("/", content_type="html/text")
@@ -64,6 +67,17 @@ def test_login_logout(client):
     assert b"Invalid username" in rv.data
     rv = login(client, app.config["USERNAME"], app.config["PASSWORD"] + "x")
     assert b"Invalid password" in rv.data
+
+
+def test_delete_message(client):
+    """Ensure the messages are being deleted"""
+    rv = client.get("/delete/1")
+    data = json.loads(rv.data)
+    assert data["status"] == 0
+    login(client, app.config["USERNAME"], app.config["PASSWORD"])
+    rv = client.get("/delete/1")
+    data = json.loads(rv.data)
+    assert data["status"] == 1
 
 
 def test_messages(client):
